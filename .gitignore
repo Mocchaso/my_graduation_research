@@ -1,6 +1,9 @@
+# not need to upload
+# files
 *.pyc
 glove.840B.300d.txt
 GoogleNews-vectors-negative300.bin
 
+# directories
 cocoa.egg-info
 web_output
