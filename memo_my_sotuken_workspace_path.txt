@@ -1,0 +1,25 @@
+pythonインタプリタでword2vecを試すためにモデルを読み込むコマンド
+import gensim
+model = gensim.models.KeyedVectors.load_word2vec_format('./GoogleNews-vectors-negative300.bin', binary=True)
+
+一連のコマンド
+
+source activate cocoa
+cd /mnt/c/users/administrator/cocoa_src/craigslistbargain
+PYTHONPATH=. python web/chat_app.py --port 5000 --config web/app_params.json --schema-path data/craigslist-schema.json --scenarios-path data/dev-scenarios.json --output web_output --price-tracker ./price_tracker.pkl --template ./templates.pkl --policy ./model.pkl
+
+source activate cocoa
+cd /mnt/c/users/administrator/cocoa_src/my_sotuken
+PYTHONPATH=. python web/chat_app.py --port 5000 --config web/app_params.json --schema-path data/craigslist-schema.json --scenarios-path data/dev-scenarios.json --output web_output --price-tracker ./price_tracker.pkl --template ./templates.pkl --policy ./model.pkl
+
+- - - - -
+
+cd /mnt/c/users/administrator/cocoa_src/my_sotuken
+
+cd /mnt/c/users/administrator/cocoa_src/craigslistbargain
+
+Webアプリ 起動コマンド
+PYTHONPATH=. python web/chat_app.py --port 5000 --config web/app_params.json --schema-path data/craigslist-schema.json --scenarios-path data/dev-scenarios.json --output web_output --price-tracker ./price_tracker.pkl --template ./templates.pkl --policy ./model.pkl
+
+Webアプリで対話した後に対話履歴をdbファイルから抽出するコマンド
+PYTHONPATH=. python ../scripts/web/dump_db.py --db web_output/chat_state.db --output web_output/transcripts/transcripts.json --surveys web_output/transcripts/surveys.json --schema data/craigslist-schema.json --scenarios-path data/dev-scenarios.json

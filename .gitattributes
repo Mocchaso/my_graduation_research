@@ -1,0 +1,2 @@
+craigslistbargain/.cache/train_batches.pkl filter=lfs diff=lfs merge=lfs -text
+my_sotuken/.cache/train_batches.pkl filter=lfs diff=lfs merge=lfs -text
