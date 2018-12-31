@@ -1,5 +1,8 @@
 <html>
     <head>
+        <!-- changed part: encode ascii -> utf-8 -->
+        <meta charset="utf-8">
+
         <title>{{title}}</title>
         <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">-->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -110,13 +113,23 @@
                 <h3>{{ waiting_message }}</h3>
 
                 <!--<h4>Make sure you have read the instructions carefully, as the task is timed and the clock will start immediately once you are paired. </h4>-->
-                <h4>Make sure you have read the instructions carefully, as the task will start immediately once you are paired. </h4>
+                
+                <!-- changed part: unnecessary in my graduation research(craigslistbargain, my_sotuken)
+                    <h4>Make sure you have read the instructions carefully, as the task will start immediately once you are paired. </h4>
+                -->
+
+                <h4>ペアリングが完了して対話が始まったら、画面左のインストラクションをよく読んでください。</h4>
             </div>
         </div>
 
         <div id="report" style="clear: both; margin: 0px 20px 0px 10px; display: block;">
-            <br><br><br><br><p style="text-align: right">Having trouble with this task? Click here to send us a report.</p>
-            <button onclick="report()" style="display: block; float:right;" id="report">Report</button>
+            <br><br><br><br>
+
+            <!--
+                <p style="text-align: right">Having trouble with this task? Click here to send us a report.</p>
+                <button onclick="report()" style="display: block; float:right;" id="report">Report</button>
+            -->
+
         </div>
         <div class="modal fade" id="report_box" role="dialog">
           <div class="modal-dialog">

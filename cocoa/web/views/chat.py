@@ -1,3 +1,6 @@
+# coding: utf-8
+# changed part: utf-8の指定。
+
 import time
 from flask import Blueprint, jsonify, render_template, request, redirect, url_for, Markup
 from flask import current_app as app
@@ -213,7 +216,9 @@ def index():
                                attributes=[attr.name for attr in chat_info.attributes],
                                num_seconds=chat_info.num_seconds,
                                title=app.config['task_title'],
-                               instructions=Markup(app.config['instructions']),
+                               # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
+                               # instructions=Markup(app.config['instructions']),
+                               instructions=Markup(app.config['instructions'].decode("utf-8")),
                                icon=app.config['task_icon'],
                                partner_kb=partner_kb,
                                quit_enabled=app.config['user_params']['skip_chat_enabled'],

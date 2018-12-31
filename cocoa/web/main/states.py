@@ -1,5 +1,6 @@
-__author__ = 'anushabala'
+# coding: utf-8
 
+__author__ = 'anushabala'
 
 class FinishedState(object):
     def __init__(self, message, num_seconds, mturk_code=None):
@@ -13,7 +14,10 @@ class WaitingState(object):
         if message and len(message) > 0:
             self.message = message
         else:
-            self.message = "Please wait while we try to find someone to pair you up with.."
+            # self.message = "Please wait while we try to find someone to pair you up with.."
+            
+            # changed part: 日本語化&str型を明示的にunicode型に変換しないとエラー起こる 
+            self.message = u"対話の相手がペアリングされるまで、しばらくお待ちください..."
         self.num_seconds = num_seconds
 
 

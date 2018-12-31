@@ -1,5 +1,8 @@
 <html>
     <head>
+        <!-- changed part: encode ascii -> utf-8 -->
+        <meta charset="utf-8">
+
         <title>{{ title }}</title>
         <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css')}}">-->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -154,7 +157,9 @@
                 $("#instructionCollapse").click();
                 window.onbeforeunload = disconnect;
 
-                document.getElementById('modal_instruction').innerHTML = "(Please read carefully! This window will automatically collapse and the chat will start after " + read_time/1000 +" seconds).";
+                // changed part: チャット画面
+                // document.getElementById('modal_instruction').innerHTML = "(Please read carefully! This window will automatically collapse and the chat will start after " + read_time/1000 +" seconds).";
+                document.getElementById('modal_instruction').innerHTML = "（よく読んでください）このウインドウは" + read_time/1000 + "秒後に自動的で消えて、その後対話が始まります。";
 
                 var deadline = new Date(Date.parse(new Date()) + ({{ num_seconds }}) * 1000);
 
@@ -543,12 +548,17 @@
             <!-- Modal content-->
             <div class="modal-content">
               <div class="modal-header">
-                <h4 class="modal-title">Negotiation scenario</h4>
+                <!-- changed part: 和訳-->
+                <!-- <h4 class="modal-title">Negotiation scenario</h4> -->
+                <h4 class="modal-title">交渉シナリオ</h4>
+
                 <b><p id="modal_instruction"></p></b>
               </div>
               <div class="modal-body">
                 {% if kb['personal']['Role'] == 'buyer' %}
-                    <p> You just saw the following post: </p>
+                    <!-- changed part: 和訳（今回、ユーザが売り手側になるケースを無くしているため、売り手側のテキストは訳さない）-->
+                    <!-- <p> You just saw the following post: </p> -->
+                    <p> あなたは以下の商品を見つけました： </p>
                 {% else %}
                     <p> You have posted the following ad (note that the buyer may not see all information): </p>
                 {% endif %}
@@ -566,7 +576,8 @@
                 </div>
                 <br>
                 {% if kb['personal']['Role'] == 'buyer' %}
-                    <p>You are very interested in this item and decide to ask about its details and negotiate the price.</p>
+                    <!-- <p>You are very interested in this item and decide to ask about its details and negotiate the price.</p> -->
+                    <p>あなたはこの商品に非常に興味を持っており、その詳細を尋ねて価格を交渉しようとしています。</p>
                 {% else %}
                     <p>You want to get rid of this item soon and are willing to negotiate the price.</p>
                 {% endif %}
@@ -578,8 +589,13 @@
 
         <div id="chat_container">
             <div id="instructions">
-                <h1 style="color:#004d00">{{ title}}</h1>
+                <h1 style="color:#004d00">{{ title }}</h1>
+
+                <!-- changed part: 和訳
                 <button type="button" id="instructionCollapse" class="btn btn-info" data-toggle="collapse" data-target="#inner">Show/Hide Instructions</button>
+                -->
+                <button type="button" id="instructionCollapse" class="btn btn-info" data-toggle="collapse" data-target="#inner">インストラクションの表示/非表示</button>
+
                 <div id="inner" class="collapse">
                     {{ instructions }}
                 </div>
@@ -608,28 +624,49 @@
                     
                 </div>
             </div> -->
-            <input id="text" placeholder="Enter your message here"><br><br>
+
+            <!-- changed part: 和訳-->
+            <!-- <input id="text" placeholder="Enter your message here"><br><br> -->
+            <input id="text" placeholder="英語でメッセージを入力、Enterキーで送信"><br><br>
 
         </div>
 
         <div id="info_container">
+            <!-- changed part: unnecessary in my graduation research(craigslistbargain, my_sotuken)
             <div id="report">
                 <p style="text-align:right">Having trouble with this task? Click here to send us a report.</p>
                 <button onclick="report()" style="display: block; float:right;" id="report">Report</button>
             </div>
+            -->
+
             <div id="facts">
-                <h3>Scenario</h3>
+                <!-- changed part: 和訳-->
+                <!-- <h3>Scenario</h3> -->
+                <h3>シナリオ</h3>
+
                 {% if kb['personal']['Role'] == 'buyer' %}
-                    <p>You are the potential <b>buyer</b>.
-                    The list price for this item is <b>{{ "$%d"|format(kb['item']['Price']) }}</b>.
-                    You would like to pay for <b>{{ "$%d"|format(kb['personal']['Target']) }}</b>.
-                    You can accept higher price though if the item is really good or there are other perks.</p>
+                    <!-- changed part: 和訳（今回、ユーザが売り手になるケースは無いので買い手のテキストのみ）-->
+                    <!--
+                        <p>You are the potential <b>buyer</b>.
+                        The list price for this item is <b>{{ "$%d"|format(kb['item']['Price']) }}</b>.
+                        You would like to pay for <b>{{ "$%d"|format(kb['personal']['Target']) }}</b>.
+                        You can accept higher price though if the item is really good or there are other perks.</p>
+                    -->
+                    <p>あなたは潜在的な<b>買い手</b>です。
+                        この商品の定価は<b>{{ "$%d"|format(kb['item']['Price']) }}</b>です。
+                        あなたはこれを<b>{{ "$%d"|format(kb['personal']['Target']) }}</b>で買いたいと思っています。
+                        その商品が本当に良いものか、または別の特典がある場合でも定価より高い価格で交渉を承諾することが可能です。</p>
+
                 {% else %}
                     <p>You are the <b>seller</b>.
                     Your listing price for this item is <b>{{ "$%d"|format(kb['item']['Price']) }}</b>.
                     You are willing to negotiate but should not go too low.
                 {% endif %}
-                <h3>Basic facts</h3>
+
+                <!-- changed part: 和訳-->
+                <!-- <h3>Basic facts</h3> -->
+                <h3>基本情報</h3>
+
                 <table>
                 <tbody>
                     {% for attr in attributes if not (attr == 'Role' or attr == 'Target' or attr == 'Bottomline' or attr == 'Price' or attr == 'Images' or attr == 'Category') %}
@@ -661,29 +698,55 @@
                 </tbody>
                 </table>
             </div>
+
             {% if partner_kb %}
                 <div id="facts">
-                    <h3>Partner Goal</h3>
+                    <!-- changed part: 和訳-->
+                    <!-- ユーザが売り手の場合のみ表示されるテキストなので必要なさそうだけど、一応。-->
+                    <!--
+                        <h3>Partner Goal</h3>
+                        <p>
+                        Your listing price for this item is {{ "$%d"|format(kb['item']['Price']) }}.
+                        </p>
+                    -->
+                    <h3>相手の目標</h3>
                     <p>
-                    Your listing price for this item is {{ "$%d"|format(kb['item']['Price']) }}.
+                    この商品に関するあなたの定価は {{ "$%d"|format(kb['item']['Price']) }}です。
                     </p>
+
                 </div>
             {% endif %}
 
             <div id="offer">
+                <!-- changed part: 和訳 -->
+                <!--
                 <h4>Final agreement:</h4>
                 <p>Be careful. You can only enter the offer <b>once</b>.</p>
                 <label for="price">Price</label>
                 <input id="price" pattern="\d+"/>
-                <!-- <label for="side_offers">Additional Terms</label> -->
-                <!-- <textarea id="side_offers" rows="2" cols="50"></textarea> -->
                 <button onclick="this.disabled=true;makeOffer()" style="display:inline-block" id="submit">Submit</button>
                 <button onclick="this.disabled=true;accept();" style="display:none" id="accept">Accept</button>
                 <button onclick="this.disabled=true;reject();" style="display:none" id="reject">Reject</button>
+                -->
+                <h4>最終的な合意:</h4>
+                <p> 交渉の申し入れは<b>1度だけしか入力できない</b>ので、注意してください。</p>
+                <label for="price">価格</label>
+                <input id="price" pattern="\d+"/>
+                <!-- <label for="side_offers">Additional Terms</label> -->
+                <!-- <textarea id="side_offers" rows="2" cols="50"></textarea> -->
+                <button onclick="this.disabled=true;makeOffer()" style="display:inline-block" id="submit">送信</button>
+                <button onclick="this.disabled=true;accept();" style="display:none" id="accept">承諾</button>
+                <button onclick="this.disabled=true;reject();" style="display:none" id="reject">拒否</button>
+
             </div>
             <div id="quit_option">
+                <!-- changed part: 和訳 -->
+                <!--
                 <h4>Quit: </h4><p> If you think that it will not be possible to negotiate a deal, you can choose to <b>quit</b> this dialogue.</p>
                 <button onclick="this.disabled=true;quit();" style="display: block" id="quit">Quit</button>
+                -->
+                <h4>中止: </h4><p> もし交渉が成立しないと思ったら、この対話を<b>中止</b>させることができます。</p>
+                <button onclick="this.disabled=true;quit();" style="display: block" id="quit">中止</button>
             </div>
 
 
