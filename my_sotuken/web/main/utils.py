@@ -15,4 +15,3 @@ class Messages(BaseMessages):
     Redirect = u"申し訳ありません、そのチャットは我々の承認基準を満たしていませんでした。"
     #BetterDeal = "Congratulations, you got the better deal! We'll award you a bonus on Mechanical Turk."
     #WorseDeal = "Sorry, your partner got the better deal. :("
-
