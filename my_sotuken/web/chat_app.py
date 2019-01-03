@@ -23,11 +23,6 @@ from main.db_reader import DatabaseReader
 from main.backend import DatabaseManager
 import options
 
-### changed parts
-import user_attributes_manager
-uam = user_attributes_manager.UserAttributesManager()
-###
-
 __author__ = 'anushabala'
 
 DB_FILE_NAME = 'chat_state.db'
@@ -192,8 +187,9 @@ if __name__ == "__main__":
     ### changed parts:
     # before set up chat_app, answer questionnaire
     if "my_sotuken" in os.getcwd():
+        import user_attributes_manager
+        uam = user_attributes_manager.UserAttributesManager()
         uam.execute_questionnaire()
-        ans = uam.answer
     ###
 
     if 'task_title' not in params.keys():

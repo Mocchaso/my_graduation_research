@@ -22,8 +22,8 @@ class UserAttributesManager:
         print("1: 品質, 2: 価格, 3: 銘柄, 4: Google検索の件数（情報量）\n")
         while True:
             try:
-                answer = int(raw_input("回答（1～4） -> ")) # cocoaの環境が2.7なのでraw_input
-                if answer < 1 or answer > 4:
+                UserAttributesManager.answer = int(raw_input("回答（1～4） -> ")) # cocoaの環境が2.7なのでraw_input
+                if UserAttributesManager.answer < 1 or UserAttributesManager.answer > 4:
                     raise AnswerRangeError()
             except (ValueError, AnswerRangeError) as e:
                 print(e)
