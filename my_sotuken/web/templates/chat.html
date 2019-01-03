@@ -569,9 +569,12 @@
                 <img class="img-thumbnail" height="250" width="250" src="{{ url_for('static', filename='images/')}}{{kb['item']['Images'][0]}}"/>
                 {% endif %}
                 <p>
+                    <!--changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした
                     {% for s in kb['item']['Description'] %}
                         {{ s }}<br/>
                     {% endfor %}
+                    -->
+                    {{ kb['item']['Description'] }}<br/>
                 </p>
                 </div>
                 <br>
@@ -673,14 +676,19 @@
                         {% if attr == 'Title' %}
                             <p><b>{{ kb['item'][attr] }}</b></p>
                             {% if kb['item']['Images']|length >= 1 %}
-                <img class="img-thumbnail" height="250" width="250" src="{{ url_for('static', filename='images/')}}{{kb['item']['Images'][0]}}"/>
-                {% endif %}
+                                <img class="img-thumbnail" height="250" width="250" src="{{ url_for('static', filename='images/')}}{{kb['item']['Images'][0]}}"/>
+                            {% endif %}
                         {% elif attr == 'Description' %}
+                            <!-- changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした
                             {% for s in kb['item'][attr] %}
                             <div id="factDescription" class="description-collapse">
                                 {{ s }}<br/>
                             </div>
                             {% endfor %}
+                            -->
+                            <div id="factDescription" class="description-collapse">
+                                {{ kb['item'][attr] }}<br/>
+                            </div>
                         {% else %}
                             <tr>
                                 <td><b>{{attr}}</b></td>

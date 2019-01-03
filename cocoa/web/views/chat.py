@@ -226,7 +226,13 @@ def index():
             pre_q_ans = str(uam.answer)
             pre_q_ans = pre_q_ans.decode("utf-8") # str -> unicodeに変換
             # additional_info: app_params.jsonから、事前アンケートに応じて新たに表示する情報を記録したJSONファイルを辞書として読み込む
-            additional_info = read_json(app.config['additional_info'])
+            # print("app.config:")
+            # print(app.config)
+            additional_info = read_json(app.config['user_params']['additional_info'])
+            print("chat_info.kb.to_dict():")
+            print(chat_info.kb.to_dict())
+            scenario_title = chat_info.kb.to_dict()["item"]["Title"] # HTML側で言うと変数kb["item"]["Title"]に該当
+
             return render_template('chat.html',
                                     debug=debug,
                                     uid=userid(),
@@ -234,33 +240,34 @@ def index():
                                     attributes=[attr.name for attr in chat_info.attributes],
                                     num_seconds=chat_info.num_seconds,
                                     title=app.config['task_title'],
-                                    # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
                                     # instructions=Markup(app.config['instructions']),
+                                    # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
                                     instructions=Markup(app.config['instructions'].decode("utf-8")),
+                                    #
                                     icon=app.config['task_icon'],
                                     partner_kb=partner_kb,
                                     quit_enabled=app.config['user_params']['skip_chat_enabled'],
                                     quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
-                                                app.config['user_params']['quit_after'],
-                                    pre_q_ans=pre_q_ans,
-                                    additional_info=additional_info)
+                                                app.config['user_params']['quit_after'])
+        else:
+            return render_template('chat.html',
+                                debug=debug,
+                                uid=userid(),
+                                kb=chat_info.kb.to_dict(),
+                                attributes=[attr.name for attr in chat_info.attributes],
+                                num_seconds=chat_info.num_seconds,
+                                title=app.config['task_title'],
+                                # instructions=Markup(app.config['instructions']),
+                                # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
+                                instructions=Markup(app.config['instructions'].decode("utf-8")),
+                                #
+                                icon=app.config['task_icon'],
+                                partner_kb=partner_kb,
+                                quit_enabled=app.config['user_params']['skip_chat_enabled'],
+                                quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
+                                            app.config['user_params']['quit_after'])
         #
-
-        return render_template('chat.html',
-                               debug=debug,
-                               uid=userid(),
-                               kb=chat_info.kb.to_dict(),
-                               attributes=[attr.name for attr in chat_info.attributes],
-                               num_seconds=chat_info.num_seconds,
-                               title=app.config['task_title'],
-                               # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
-                               # instructions=Markup(app.config['instructions']),
-                               instructions=Markup(app.config['instructions'].decode("utf-8")),
-                               icon=app.config['task_icon'],
-                               partner_kb=partner_kb,
-                               quit_enabled=app.config['user_params']['skip_chat_enabled'],
-                               quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
-                                          app.config['user_params']['quit_after'])
+    
     elif status == Status.Survey:
         survey_info = backend.get_survey_info(userid())
         visualization = None
