@@ -12,6 +12,15 @@ from cocoa.core.event import Event
 from web.main.backend import Backend
 get_backend = Backend.get_backend
 
+# change part:
+# -> my_sotuken/web/chat_app.pyが実行されているかを確認する
+# -> そうだったら、事前アンケートの結果を持ってくる
+import os
+if "my_sotuken" in os.getcwd():
+    import user_attributes_manager
+    uam = user_attributes_manager.UserAttributesManager()
+#
+
 chat = Blueprint('chat', __name__)
 
 @chat.route('/_connect/', methods=['GET'])
@@ -209,6 +218,26 @@ def index():
         if request.args.get('debug') is not None and request.args.get('debug') == '1':
             debug = True
         chat_info = backend.get_chat_info(userid())
+        # changed part:
+        # チャット画面へ遷移する時、事前アンケートの結果を参照する
+        if "my_sotuken" in os.getcwd():
+            pre_q_ans = uam.answer
+            return render_template('chat.html',
+                                debug=debug,
+                                uid=userid(),
+                                kb=chat_info.kb.to_dict(),
+                                attributes=[attr.name for attr in chat_info.attributes],
+                                num_seconds=chat_info.num_seconds,
+                                title=app.config['task_title'],
+                                # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
+                                # instructions=Markup(app.config['instructions']),
+                                instructions=Markup(app.config['instructions'].decode("utf-8")),
+                                icon=app.config['task_icon'],
+                                partner_kb=partner_kb,
+                                quit_enabled=app.config['user_params']['skip_chat_enabled'],
+                                quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
+                                            app.config['user_params']['quit_after'])
+        #
         return render_template('chat.html',
                                debug=debug,
                                uid=userid(),
