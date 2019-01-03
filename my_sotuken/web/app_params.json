@@ -35,6 +35,7 @@
     "end_survey": 1,
     "skip_chat_enabled": false,
     "num_chats_per_scenario": {"human": 1, "rulebased": 2},
-    "debug": false
+	"debug": false,
+	"additional_info": "data/my-additional-info-ja.json"
 }
 

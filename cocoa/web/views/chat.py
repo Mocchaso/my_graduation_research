@@ -16,6 +16,7 @@ get_backend = Backend.get_backend
 # -> my_sotuken/web/chat_app.pyが実行されているかを確認する
 # -> そうだったら、事前アンケートの結果を持ってくる
 import os
+from cocoa.core.util import read_json
 if "my_sotuken" in os.getcwd():
     import user_attributes_manager
     uam = user_attributes_manager.UserAttributesManager()
@@ -218,26 +219,33 @@ def index():
         if request.args.get('debug') is not None and request.args.get('debug') == '1':
             debug = True
         chat_info = backend.get_chat_info(userid())
+
         # changed part:
         # チャット画面へ遷移する時、事前アンケートの結果を参照する
         if "my_sotuken" in os.getcwd():
-            pre_q_ans = uam.answer
+            pre_q_ans = str(uam.answer)
+            pre_q_ans = pre_q_ans.decode("utf-8") # str -> unicodeに変換
+            # additional_info: app_params.jsonから、事前アンケートに応じて新たに表示する情報を記録したJSONファイルを辞書として読み込む
+            additional_info = read_json(app.config['additional_info'])
             return render_template('chat.html',
-                                debug=debug,
-                                uid=userid(),
-                                kb=chat_info.kb.to_dict(),
-                                attributes=[attr.name for attr in chat_info.attributes],
-                                num_seconds=chat_info.num_seconds,
-                                title=app.config['task_title'],
-                                # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
-                                # instructions=Markup(app.config['instructions']),
-                                instructions=Markup(app.config['instructions'].decode("utf-8")),
-                                icon=app.config['task_icon'],
-                                partner_kb=partner_kb,
-                                quit_enabled=app.config['user_params']['skip_chat_enabled'],
-                                quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
-                                            app.config['user_params']['quit_after'])
+                                    debug=debug,
+                                    uid=userid(),
+                                    kb=chat_info.kb.to_dict(),
+                                    attributes=[attr.name for attr in chat_info.attributes],
+                                    num_seconds=chat_info.num_seconds,
+                                    title=app.config['task_title'],
+                                    # changed part: instructionsの中に日本語を入れるとUnicodeEncodeError -> 以下で回避
+                                    # instructions=Markup(app.config['instructions']),
+                                    instructions=Markup(app.config['instructions'].decode("utf-8")),
+                                    icon=app.config['task_icon'],
+                                    partner_kb=partner_kb,
+                                    quit_enabled=app.config['user_params']['skip_chat_enabled'],
+                                    quit_after=app.config['user_params']['status_params']['chat']['num_seconds'] -
+                                                app.config['user_params']['quit_after'],
+                                    pre_q_ans=pre_q_ans,
+                                    additional_info=additional_info)
         #
+
         return render_template('chat.html',
                                debug=debug,
                                uid=userid(),
