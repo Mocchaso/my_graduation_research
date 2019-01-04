@@ -255,7 +255,9 @@ def index():
                 new_info = additional_info[scenario_title][pre_q_ans]
                 # 追加の情報を付加したchat_infoを新たに作る
                 new_chat_info_kb = chat_info.kb.to_dict()
-                new_chat_info_kb["item"]["Description"] += new_info
+                # チャットの長さが短くてやり直しになった時、二重に追加情報が足されないようにする
+                if new_info not in new_chat_info_kb:
+                    new_chat_info_kb["item"]["Description"] += new_info
 
                 return render_template('chat.html',
                                         debug=debug,
