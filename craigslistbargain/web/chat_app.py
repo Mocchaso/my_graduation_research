@@ -184,6 +184,13 @@ if __name__ == "__main__":
     params['logging']['app_log'] = log_file
     params['logging']['chat_dir'] = transcripts_dir
 
+    ### changed parts:
+    # before set up chat_app, answer questionnaire
+    import user_attributes_manager
+    uam = user_attributes_manager.UserAttributesManager()
+    uam.execute_questionnaire()
+    ###
+
     if 'task_title' not in params.keys():
         raise ValueError("Title of task should be specified in config file with the key 'task_title'")
 
