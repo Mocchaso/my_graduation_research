@@ -197,8 +197,17 @@
         <br>
 
         <div class="header">
-            <h2><b>Survey Instructions</b></h2> <br>
-            <p>In order to complete this HIT, please answer the following questions about your partner in the dialogue that you just completed.</p>
+            <!-- changed part: 和訳&内容を少し変更
+                <h2><b>Survey Instructions</b></h2> <br>
+                <p>In order to complete this HIT, please answer the following questions about your partner in the dialogue that you just completed.</p>
+            -->
+            <h2><b>ユーザーアンケート回答のお願い</b></h2> <br>
+            <p style="text-align:center;">以下のGoogleフォームのアンケートに回答していただきますよう、お願いいたします。</p>
+
+            <!-- changed part: Googleフォームへのリンクを追加-->
+            <p style="text-align:center;">
+                <a href="https://goo.gl/forms/qyWj1tS1kqBLdLaY2" target="_blank"><b><u>ユーザアンケート 回答フォーム</u></b></a>
+            </p>
         </div>
 
         <br> <br>
@@ -297,8 +306,11 @@
         <br> <br>
         -->
 
+        <!-- changed part: 不要になった箇所
         <div class="q">
+        -->
             <!--<p style="text-align:center;">Was your partner a good <strong>negotiator</strong>?</p> <br>-->
+        <!-- changed part: 不要になった箇所（続き）    
             <p style="text-align:center;">Do you think your partner demonstrated reasonable <strong>human</strong> behavior?</p> <br>
 
             <form id="q_h">
@@ -306,25 +318,29 @@
                 <input type="range" id="negotiator" min="1" max="5" style="width:50%; margin-left:17%;" >
                 <p style="float:right;">Definitely</p>
             </form>
+            
         </div>
+        -->
         
         <br> <br>
         
-        <div class="q">
-        	<p style="text-align:center;">(optional) Please add any comments/feedback related to the dialogue below. (for e.g., comments on how we can improve this platform, why you made the above ratings, etc.)</p>
-        	<form id="q_comm">
-        	<textarea id="comments" cols="100" rows="5"></textarea>
-        	</form>
-        </div>
+        <!-- changed part: 不要になった箇所
+            <div class="q">
+                <p style="text-align:center;">(optional) Please add any comments/feedback related to the dialogue below. (for e.g., comments on how we can improve this platform, why you made the above ratings, etc.)</p>
+                <form id="q_comm">
+                <textarea id="comments" cols="100" rows="5"></textarea>
+                </form>
+            </div>
 
-        <br>
+            <br>
 
-        <br>
+            <br>
 
 
-        <div class="buttons" style="text-align:center;">
-         <button type="button" id="submit" >Submit HIT!</button>
-        </div>
+            <div class="buttons" style="text-align:center;">
+            <button type="button" id="submit" >Submit HIT!</button>
+            </div>
+        -->
 
     </div>
 

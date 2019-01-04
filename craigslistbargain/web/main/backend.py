@@ -1,3 +1,6 @@
+# coding: utf-8
+# changed part: 文字コードの指定
+
 import sqlite3
 import json
 import time
