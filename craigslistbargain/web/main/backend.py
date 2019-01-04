@@ -75,10 +75,14 @@ class Backend(BaseBackend):
 
         if game_over:
             if not self.is_user_partner_bot(cursor, userid):
-                min_tokens = 40
+                # min_tokens = 40
+                # changed part: チャット内の発話の合計単語数の制限を緩和する
+                min_tokens = 10
                 verify_chat(partner_id, 1 - agent_idx, True, min_tokens=min_tokens)
             else:
-                min_tokens = 30
+                # min_tokens = 30
+                # changed part: チャット内の発話の合計単語数の制限を緩和する
+                min_tokens = 5
             verify_chat(userid, agent_idx, False, min_tokens=min_tokens)
             return True
 
