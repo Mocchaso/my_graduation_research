@@ -19,11 +19,11 @@ experiment_target_furnitures = [
 # 買い手側に見える商品データの説明文、日本語版
 # HTML内でsafeフィルターを適用しているので、以下のHTMLタグも反映されるようになっている
 description_buyer_ja = [
-    u"幅：31と1/2 inch（80 cm）、深さ：11 inch（28 cm）<br>商品の詳細情報：https://www.ikea.com/us/en/catalog/products/70263842/<br>（類似商品）https://www.ikea.com/jp/ja/catalog/products/S89279225/",
-    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br>商品の詳細情報：https://www.ikea.com/jp/ja/catalog/products/30176069/",
-    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br>商品の詳細情報：https://www.ikea.com/jp/ja/catalog/products/30354660/",
-    u"IKEA製のナイトテーブルです。<br>商品の詳細情報：https://www.ikea.com/jp/ja/catalog/products/30355706/",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては不適切では...？
-    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br>商品の詳細情報：https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416"
+    u"幅：31と1/2 inch（80 cm）、深さ：11 inch（28 cm）<br><a href='https://www.ikea.com/us/en/catalog/products/70263842/' target='_blank'>商品の詳細情報</a><br><a href='https://www.ikea.com/jp/ja/catalog/products/S89279225/' target='_blank'>（類似商品の詳細情報）</a>",
+    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30176069/' target='_blank'>商品の詳細情報</a>",
+    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30354660/' target='_blank'>商品の詳細情報</a>",
+    u"IKEA製のナイトテーブルです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30355706/' target='_blank'>商品の詳細情報</a>",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては不適切では...？
+    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416' target='_blank'>商品の詳細情報</a>"
 ]
 
 """
