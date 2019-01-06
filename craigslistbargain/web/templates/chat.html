@@ -159,7 +159,7 @@
 
                 // changed part: チャット画面
                 // document.getElementById('modal_instruction').innerHTML = "(Please read carefully! This window will automatically collapse and the chat will start after " + read_time/1000 +" seconds).";
-                document.getElementById('modal_instruction').innerHTML = "（よく読んでください）このウインドウは" + read_time/1000 + "秒後に自動的で消えて、その後対話が始まります。";
+                document.getElementById('modal_instruction').innerHTML = "（よく読んでください）このウインドウは" + read_time/1000 + "秒後に自動で消え、対話が始まります。";
 
                 var deadline = new Date(Date.parse(new Date()) + ({{ num_seconds }}) * 1000);
 
@@ -558,7 +558,7 @@
                 {% if kb['personal']['Role'] == 'buyer' %}
                     <!-- changed part: 和訳（今回、ユーザが売り手側になるケースを無くしているため、売り手側のテキストは訳さない）-->
                     <!-- <p> You just saw the following post: </p> -->
-                    <p> あなたは以下の商品を見つけました： </p>
+                    <p> あなたは以下の商品を見つけました：</p>
                 {% else %}
                     <p> You have posted the following ad (note that the buyer may not see all information): </p>
                 {% endif %}
@@ -569,18 +569,18 @@
                 <img class="img-thumbnail" height="250" width="250" src="{{ url_for('static', filename='images/')}}{{kb['item']['Images'][0]}}"/>
                 {% endif %}
                 <p>
-                    <!--changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした
+                    <!--changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした + safeフィルターを適用した
                     {% for s in kb['item']['Description'] %}
                         {{ s }}<br/>
                     {% endfor %}
                     -->
-                    {{ kb['item']['Description'] }}<br/>
+                    {{ kb['item']['Description'] | safe }}<br/>
                 </p>
                 </div>
                 <br>
                 {% if kb['personal']['Role'] == 'buyer' %}
                     <!-- <p>You are very interested in this item and decide to ask about its details and negotiate the price.</p> -->
-                    <p>あなたはこの商品に非常に興味を持っており、その詳細を尋ねて価格を交渉しようとしています。</p>
+                    <p>あなたはこの商品に大変興味を持ち、その詳細を尋ねて価格交渉を行おうとしています。</p>
                 {% else %}
                     <p>You want to get rid of this item soon and are willing to negotiate the price.</p>
                 {% endif %}
@@ -655,10 +655,9 @@
                         You would like to pay for <b>{{ "$%d"|format(kb['personal']['Target']) }}</b>.
                         You can accept higher price though if the item is really good or there are other perks.</p>
                     -->
-                    <p>あなたは潜在的な<b>買い手</b>です。
-                        この商品の定価は<b>{{ "$%d"|format(kb['item']['Price']) }}</b>です。
-                        あなたはこれを<b>{{ "$%d"|format(kb['personal']['Target']) }}</b>で買いたいと思っています。
-                        その商品が本当に良いものか、または別の特典がある場合でも定価より高い価格で交渉を承諾することが可能です。</p>
+                    <p>この商品の定価は<b>{{ "$%d"|format(kb['item']['Price']) }}</b>です。<br>
+                       あなたはこれを<b>{{ "$%d"|format(kb['personal']['Target']) }}</b>で買いたいと思っています。<br>
+                       （その商品が本当に良いものだと思った場合、あるいは別の特典がある場合は、定価より高い価格で取引しても構いません。）</p>
 
                 {% else %}
                     <p>You are the <b>seller</b>.
@@ -679,7 +678,7 @@
                                 <img class="img-thumbnail" height="250" width="250" src="{{ url_for('static', filename='images/')}}{{kb['item']['Images'][0]}}"/>
                             {% endif %}
                         {% elif attr == 'Description' %}
-                            <!-- changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした
+                            <!-- changed part: 説明文の日本語版が、1行に1文字しか入らなくなったので、for文を無くした + safeフィルターを適用した
                             {% for s in kb['item'][attr] %}
                             <div id="factDescription" class="description-collapse">
                                 {{ s }}<br/>
@@ -687,7 +686,7 @@
                             {% endfor %}
                             -->
                             <div id="factDescription" class="description-collapse">
-                                {{ kb['item'][attr] }}<br/>
+                                {{ kb['item'][attr] | safe }}<br/>
                             </div>
                         {% else %}
                             <tr>
@@ -736,8 +735,8 @@
                 <button onclick="this.disabled=true;accept();" style="display:none" id="accept">Accept</button>
                 <button onclick="this.disabled=true;reject();" style="display:none" id="reject">Reject</button>
                 -->
-                <h4>最終的な合意:</h4>
-                <p> 交渉の申し入れは<b>1度だけしか入力できない</b>ので、注意してください。</p>
+                <h4>最終合意</h4>
+                <p>注意：交渉の申し入れは<b>1度だけ入力できます。</b></p>
                 <label for="price">価格</label>
                 <input id="price" pattern="\d+"/>
                 <!-- <label for="side_offers">Additional Terms</label> -->
@@ -753,7 +752,8 @@
                 <h4>Quit: </h4><p> If you think that it will not be possible to negotiate a deal, you can choose to <b>quit</b> this dialogue.</p>
                 <button onclick="this.disabled=true;quit();" style="display: block" id="quit">Quit</button>
                 -->
-                <h4>中止: </h4><p> もし交渉が成立しないと思ったら、この対話を<b>中止</b>させることができます。</p>
+                <h4>チャットの中止</h4>
+                <p>もし交渉が成立しないと思ったら、この対話を<b>中止</b>させることができます。</p>
                 <button onclick="this.disabled=true;quit();" style="display: block" id="quit">中止</button>
             </div>
 

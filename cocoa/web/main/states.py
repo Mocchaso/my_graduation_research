@@ -17,7 +17,7 @@ class WaitingState(object):
             # self.message = "Please wait while we try to find someone to pair you up with.."
             
             # changed part: 日本語化&str型を明示的にunicode型に変換しないとエラー起こる 
-            self.message = u"対話の相手がペアリングされるまで、しばらくお待ちください..."
+            self.message = u"対話の相手とペアが組まれるまで、少々お待ちください..."
         self.num_seconds = num_seconds
 
 
