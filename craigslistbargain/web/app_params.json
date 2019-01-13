@@ -26,7 +26,7 @@
 	}
     },
     "connection_timeout_num_seconds": 3,
-    "idle_timeout_num_seconds": 210,
+    "idle_timeout_num_seconds": 1230,
     "templates_dir": "web/templates",
     "images_base": "web/static/images",
     "instructions": "web/templates/craigslist-instructions.html",

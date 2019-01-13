@@ -26,7 +26,7 @@
 	}
     },
     "connection_timeout_num_seconds": 3,
-    "idle_timeout_num_seconds": 210,
+    "idle_timeout_num_seconds": 1230,
     "templates_dir": "web/templates",
     "images_base": "web/static/images",
     "instructions": "web/templates/craigslist-instructions.html",
@@ -35,7 +35,6 @@
     "end_survey": 1,
     "skip_chat_enabled": false,
     "num_chats_per_scenario": {"human": 1, "rulebased": 2},
-	"debug": false,
-	"additional_info": "data/my-additional-info-ja.json"
+	"debug": false
 }
 
