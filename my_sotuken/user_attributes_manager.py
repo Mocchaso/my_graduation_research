@@ -2,7 +2,7 @@
 
 class AnswerRangeError(Exception):
     """
-    In previous questoinnaire, catch exception when inputted values except 1 ~ 5
+    In previous questoinnaire, catch exception when inputted values except 1 ~ 3
     """
     def __str__(self):
         return "inputted value is out of range as the answer!"
@@ -16,7 +16,7 @@ class UserAttributesManager:
     def execute_questionnaire(self):
         """
         do questionnaire
-        re-input when inputted str or float or int except 1 ~ 4
+        re-input when inputted str or float or int except 1 ~ 3
         """
         print("\n買い物をする際、あなたが最も重視する点は何ですか？")
         print("1: 品質, 2: 価格, 3: 銘柄\n")
