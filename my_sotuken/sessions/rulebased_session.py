@@ -1,3 +1,6 @@
+# coding: utf-8
+# changed part: 文字コードの指定
+
 import random
 import re
 import logging
@@ -13,6 +16,10 @@ from cocoa.sessions.rulebased_session import RulebasedSession as BaseRulebasedSe
 from core.tokenizer import tokenize, detokenize
 from model.parser import Parser, Utterance
 from model.dialogue_state import DialogueState
+
+### changed part: 類似商品の情報を読み込むために追加
+from cocoa.core.util import read_json
+###
 
 class RulebasedSession(object):
     @classmethod
