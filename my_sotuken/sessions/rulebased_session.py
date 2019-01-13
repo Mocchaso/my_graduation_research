@@ -17,8 +17,9 @@ from core.tokenizer import tokenize, detokenize
 from model.parser import Parser, Utterance
 from model.dialogue_state import DialogueState
 
-### changed part: 類似商品の情報を読み込むために追加
-from cocoa.core.util import read_json
+### changed part
+from cocoa.core.util import read_json # 類似商品の情報を読み込むために追加
+from user_attributes_manager import UserAttributesManager as uam # ユーザの買い物属性を考慮して発話文生成を行うために追加
 ###
 
 class RulebasedSession(object):
@@ -114,12 +115,85 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
     def fill_template(self, template, price=None):
         return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
+    
+    def add_quality_info(self, product_name, similar_product_info):
+        """
+        品質重視のユーザに対して新たな発話文生成を行う
+        """
+        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
+        key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"]
+        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
+        selected_product_of_random_review = random.choice(similar_product_info[key]["reviews"]) # レビュー文をランダムで取得
+        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
+        if selected_product_of_random_review == []: # ポジティブなレビューが無い場合
+            add_info = " / Not found appropriate review of similar product, URL: {}".format(selected_product_url)
+            return add_info
+        else:
+            add_info = " / Review of similar product: {} URL: {}".format(selected_product_of_random_review, selected_product_url) # 英文間の半角スペース付き
+            return add_info
+    
+    def add_price_info(self, product_name, imilar_product_info):
+        """
+        価格重視のユーザに対して新たな発話文生成を行う
+        """
+        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
+        key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"]
+        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
+        selected_product_price_dollar = similar_product_info[key]["price_dollar"] # 選ばれた商品のドル価格（オンラインストア表示価格）
+        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
+
+        add_info = " / Price of similar product: {} dollars(from online store). URL: {}".format(selected_product_price_dollar, selected_product_url) # 英文間の半角スペース付き
+        return add_info
+    
+    def add_brand_info(self, product_name, similar_product_info):
+        """
+        銘柄重視のユーザに対して新たな発話文生成を行う
+        """
+        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
+        key_candidates = ["_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"] # 実験で使う商品はIKEAの商品のみなので、IKEA以外の類似商品を候補とする
+        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
+        selected_product_price_dollar = similar_product_info[key]["price_dollar"] # 選ばれた商品のドル価格（オンラインストア表示価格）
+        selected_product_brand = similar_product_info[key]["brand"] # 選ばれた商品の銘柄
+        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
+
+        add_info = " / Price of similar product, brand {}: {} dollars(from online store). URL: {}".format(selected_product_brand, selected_product_price_dollar, selected_product_url) # 英文間の半角スペース付き
+        return add_info
 
     def template_message(self, intent, price=None):
         print 'template:', intent, price
         template = self.retrieve_response_template(intent, category=self.kb.category, role=self.kb.role)
-        print "templates:"
+        print "templates:" # {'category': ..., 'template': ..., 'logp': ..., 'source': 'rule', 'tag': ..., 'role': ..., 'context': ..., 'id': ..., 'context_tag': ...}
         print template
+
+        ### changed part: テンプレートに追加情報を付与
+        if intent == 'counter-price':
+            en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
+
+            # シナリオのタイトルから大雑把な商品名を記録
+            scenario_title = self.kb.title.lower() # シナリオのタイトルを小文字化
+            estimated_product_name = "" 
+            if "billy" in scenario_title:
+                estimated_product_name = "billy"
+            elif "erik" in scenario_title:
+                estimated_product_name = "erik"
+            elif "malm" in scenario_title:
+                estimated_product_name = "malm"
+            elif "night stand" in scenario_title:
+                estimated_product_name = "kullen"
+            elif "millberget" in scenario_title:
+                estimated_product_name = "millberget"
+            
+            # ユーザの買い物属性ごとに、追加する情報を変化させる
+            if uam.answer == 1: # 品質重視
+                template["template"] += self.add_quality_info(estimated_product_name, en_positive_reviews_info)
+            elif uam.answer == 2: # 価格重視
+                template["template"] += self.add_price_info(estimated_product_name, en_positive_reviews_info)
+            elif uam.answer == 3: # 銘柄重視
+                template["template"] += self.add_brand_info(estimated_product_name, en_positive_reviews_info)
+            print "templates(added more info):"
+            print template
+        ###
+
         if '{price}' in template['template']:
             price = price or self.state.my_price
         else:
