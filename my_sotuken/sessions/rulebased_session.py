@@ -132,7 +132,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
             add_info = " / Review of similar product: {} URL: {}".format(selected_product_of_random_review, selected_product_url) # 英文間の半角スペース付き
             return add_info
     
-    def add_price_info(self, product_name, imilar_product_info):
+    def add_price_info(self, product_name, similar_product_info):
         """
         価格重視のユーザに対して新たな発話文生成を行う
         """
