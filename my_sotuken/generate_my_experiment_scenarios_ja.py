@@ -19,11 +19,11 @@ experiment_target_furnitures = [
 # 買い手側に見える商品データの説明文、日本語版
 # HTML内でsafeフィルターを適用しているので、以下のHTMLタグも反映されるようになっている
 description_buyer_ja = [
-    u"幅：31と1/2 inch（80 cm）、深さ：11 inch（28 cm）<br><a href='https://www.ikea.com/us/en/catalog/products/70263842/' target='_blank'>商品の詳細情報（英語）</a><br><a href='https://www.ikea.com/jp/ja/catalog/products/S89279225/' target='_blank'>（類似商品の詳細情報（日本語））</a>",
-    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30176069/' target='_blank'>商品の詳細情報</a>",
-    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30354660/' target='_blank'>商品の詳細情報</a>",
-    u"IKEA製のナイトテーブルです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30355706/' target='_blank'>商品の詳細情報</a>",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては不適切では...？
-    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416' target='_blank'>商品の詳細情報</a>"
+    u"幅：31と1/2 inch（80 cm）、奥行き：11 inch（28 cm）<br><a href='https://www.ikea.com/jp/ja/catalog/products/10404246/#/40351581' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
+    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30176069/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
+    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30354660/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
+    u"IKEA製のナイトテーブルです。幅：35 cm、奥行き：40 cm、高さ：49 cm<br><a href='https://www.ikea.com/jp/ja/catalog/products/30355706/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては微妙なので少し変更する
+    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>"
 ]
 
 """
@@ -81,6 +81,8 @@ ikea millberget ... :
 """
 
 def extract_furnitures_scenarios():
+    print(u"実験で使用するシナリオデータの英語版（JSONファイル）を作成します。")
+
     all_furnitures_dict = read_json(all_furnitures_json_path)
     experiment_target_scenarios0 = []
     experiment_target_scenarios1 = []
@@ -120,7 +122,7 @@ def extract_furnitures_scenarios():
     print("finished storing all targets as a json file.")
 
 def extract_furnitures_scenarios_as_ja():
-    print(u"日本語版の説明文つきのJSONファイルを作成します。")
+    print(u"実験で使用するシナリオデータの日本語版（JSONファイル）を作成します。")
     experiment_target_scenarios = read_json(new_json_name)
 
     # 説明文を、日本語のものに置換
@@ -141,6 +143,7 @@ def extract_furnitures_scenarios_as_ja():
     print("finished storing all targets as a json file.")
 
 if __name__ == "__main__":
+    extract_furnitures_scenarios()
     extract_furnitures_scenarios_as_ja()
 
     test_json = read_json(new_json_name_javer)
