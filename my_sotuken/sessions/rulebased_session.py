@@ -20,6 +20,11 @@ from model.dialogue_state import DialogueState
 ### changed part
 from cocoa.core.util import read_json # 類似商品の情報を読み込むために追加
 from user_attributes_manager import UserAttributesManager as uam # ユーザの買い物属性を考慮して発話文生成を行うために追加
+from cocoa.analysis.utils import get_total_turns # 対話の経過ターン数によってポリシーの挙動を変えるのに用いる
+from web.main.backend import Backend # my_sotukenのbackend ... get_total_turnsで引数をとる準備に用いる
+from cocoa.web.views.utils import userid # ユーザIDの取得に用いる
+from web.main.db_reader import DatabaseReader # my_sotukenのdb_reader
+import sqlite3 # chat_state.dbへのアクセスに使用
 ###
 
 class RulebasedSession(object):
@@ -53,6 +58,12 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         # Direction of desired price
         self.inc = None
+
+        ### changed part:
+        self.policy_mode = 1 # 各ポリシーの対話モード(1: 通常の価格の提案, 2, 3は各ポリシーに後述)
+        self.prev_total_turns = 0 # 前回価格の提案をした時の経過ターン数を記録する
+        self.backend = Backend.get_backend() # get_total_turnsで引数をとる準備に用いる
+        ###
 
     def shorten_title(self, title):
         """If the title is too long, shorten it using a generic name for filling in the templates.
@@ -116,6 +127,52 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
     def fill_template(self, template, price=None):
         return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
     
+    def quality_policy(self, mode):
+        """
+        品質重視のユーザに対して新たな発話文生成を行う
+        1: 価格の提案（通常モード。追加する情報は無し）
+        2: 売り手が出そうとした価格より少し高い価格の提案＋その価格に近い類似商品の、商品名と品質に関してポジティブなレビュー
+        3: 売り手が出そうとした価格と同じぐらいの価格の提案＋その価格に近い類似商品の、商品名と品質に関してポジティブなレビュー
+        """
+        if mode == 1:
+            return u"あ"
+        elif mode == 2:
+            a
+        elif mode == 3:
+            a
+        return a
+
+    def price_policy(self, mode):
+        """
+        価格重視のユーザに対して新たな発話文生成を行う
+        1: 価格の提案（通常モード。追加する情報は無し）
+        2: 売り手が出そうとした価格より少し低い価格の提案＋その価格に近い類似商品の商品名
+        3: 更に低い価格の提案＋その価格に近い類似商品の商品名
+        """
+        if mode == 1:
+            return ""
+        elif mode == 2:
+            a
+        elif mode == 3:
+            a
+        return a
+
+    def brand_policy(self, mode):
+        """
+        銘柄重視のユーザに対して新たな発話文生成を行う
+        1: 価格の提案（通常モード。追加する情報は無し）
+        2: 売り手が出そうとした価格と同じぐらいの価格の提案＋その価格に近く、交渉中の商品より良い銘柄の類似商品
+        3: 売り手が出そうとした価格より少し低い価格の提案＋その価格に近く、交渉中の商品より良い銘柄の類似商品
+        """
+        if mode == 1:
+            return ""
+        elif mode == 2:
+            a
+        elif mode == 3:
+            a
+        return a
+
+    '''
     def add_quality_info(self, product_name, similar_product_info):
         """
         品質重視のユーザに対して新たな発話文生成を行う
@@ -164,6 +221,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         add_info = " / Price of similar product, brand {}: {} dollars(from online store). URL: {}".format(selected_product_brand, selected_product_price_dollar, selected_product_url) # 英文間の半角スペース付き
         return add_info
+    '''
 
     def template_message(self, intent, price=None):
         print 'template:', intent, price
@@ -173,7 +231,27 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         ### changed part: テンプレートに追加情報を付与
         if intent == 'counter-price':
-            en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
+            # get_total_turns()の引数にとるデータの準備
+            controller = self.backend.controller_map[userid()]
+            conn = sqlite3.connect(self.backend.config["db"]["location"])
+            cursor = conn.cursor()
+            chat_id = controller.get_chat_id()
+            scenario_db = self.backend.scenario_db
+            print("controller: {}".format(controller))
+            print("conn: {}".format(conn))
+            print("cursor: {}".format(cursor))
+            print("chat_id: {}".format(chat_id))
+            print("scenario_db: {}".format(scenario_db))
+            ex = DatabaseReader.get_chat_example(cursor, chat_id, scenario_db).to_dict()
+            conn.close()
+
+            total_turns = get_total_turns(ex)
+            self.prev_total_turns = total_turns # システム側が価格を提案し終わったら、その時点でのターン数を記録(前回の価格の提案から何ターン経過したかを計算するのに用いる)
+            print("counter-price...")
+            print("total_turns: {}".format(total_turns))
+            print("self.prev_total_turns: {}".format(self.prev_total_turns))
+
+            # en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
 
             # シナリオのタイトルから大雑把な商品名を記録
             scenario_title = self.kb.title.lower() # シナリオのタイトルを小文字化
@@ -189,13 +267,24 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
             elif "millberget" in scenario_title:
                 estimated_product_name = "millberget"
             
+            # ポリシーを動かすモードを変更する
+            if total_turns - self.prev_total_turns == 2: # 前回の価格の提案から2ターン経過したら
+                if self.policy_mode == 1:
+                    self.policy_mode = 2
+                elif self.policy_mode == 2:
+                    self.policy_mode = 3
+
             # ユーザの買い物属性ごとに、追加する情報を変化させる
             if uam.answer == 1: # 品質重視
-                template["template"] += self.add_quality_info(estimated_product_name, en_positive_reviews_info)
+                # template["template"] += self.add_quality_info(estimated_product_name, en_positive_reviews_info)
+                template["template"] += self.quality_policy(self.policy_mode)
             elif uam.answer == 2: # 価格重視
-                template["template"] += self.add_price_info(estimated_product_name, en_positive_reviews_info)
+                # template["template"] += self.add_price_info(estimated_product_name, en_positive_reviews_info)
+                template["template"] += self.price_policy(self.policy_mode)
             elif uam.answer == 3: # 銘柄重視
-                template["template"] += self.add_brand_info(estimated_product_name, en_positive_reviews_info)
+                # template["template"] += self.add_brand_info(estimated_product_name, en_positive_reviews_info)
+                template["template"] += self.brand_policy(self.policy_mode)
+            
             print "templates(added more info):"
             print template
         ###
