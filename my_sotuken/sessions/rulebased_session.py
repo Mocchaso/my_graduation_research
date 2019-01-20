@@ -133,9 +133,9 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = target_price * (1 + 0.05) # システムが提案する価格より5%高い価格で類似商品を検索
+            target_price = target_price * (1 + 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%高い価格に設定
         elif mode == 3:
-            target_price = sys_thinking_price # システムが提案する価格と同じ価格で類似商品を検索
+            target_price = sys_thinking_price # 類似商品の検索にかける価格を、システムが提案する価格と同じ価格に設定
 
     def price_policy(self, mode, sys_thinking_price):
         """
@@ -150,9 +150,9 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = target_price * (1 - 0.05) # システムが提案する価格より5%低い価格で類似商品を検索
+            target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
         elif mode == 3:
-            target_price = target_price * (1 - 0.1) # システムが提案する価格より10%低い価格で類似商品を検索
+            target_price = target_price * (1 - 0.1) # 類似商品の検索にかける価格を、システムが提案する価格より10%低い価格に設定
 
     def brand_policy(self, mode, sys_thinking_price):
         """
@@ -167,9 +167,9 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = target_price * (1 - 0.05) # システムが提案する価格より5%低い価格で類似商品を検索
+            target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
         elif mode == 3:
-            target_price = target_price * (1 - 0.1) # システムが提案する価格より10%低い価格で類似商品を検索
+            target_price = target_price * (1 - 0.1) # 類似商品の検索にかける価格を、システムが提案する価格より10%低い価格に設定
 
     def template_message(self, intent, price=None):
         print 'template:', intent, price
