@@ -56,8 +56,6 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         ### changed part:
         self.policy_mode = 1 # 各ポリシーの対話モード(1: 通常の価格の提案, 2, 3は各ポリシーに後述)
-        self.prev_total_turns = 0 # 前回価格の提案をした時の経過ターン数を記録する
-        self.backend = Backend.get_backend() # get_total_turnsで引数をとる準備に用いる
         ###
 
     def shorten_title(self, title):
