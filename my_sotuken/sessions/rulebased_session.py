@@ -127,13 +127,15 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格より少し高い価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         3: 価格の提案＋提案する価格と同じぐらいの価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         """
+        quality_add_info = read_json("")
+        target_price = sys_thinking_price
+        
         if mode == 1:
-            return ""
+            return "" # 追加する情報は無し
         elif mode == 2:
-            a
+            target_price = target_price * (1 + 0.05) # システムが提案する価格より5%高い価格で類似商品を検索
         elif mode == 3:
-            a
-        return a
+            target_price = sys_thinking_price # システムが提案する価格と同じ価格で類似商品を検索
 
     def price_policy(self, mode, sys_thinking_price):
         """
@@ -142,13 +144,15 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格より少し低い価格の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より低い価格の類似商品の商品名とその価格（2より低めの価格とする）
         """
+        price_add_info = read_json("")
+        target_price = sys_thinking_price
+        
         if mode == 1:
-            return ""
+            return "" # 追加する情報は無し
         elif mode == 2:
-            a
+            target_price = target_price * (1 - 0.05) # システムが提案する価格より5%低い価格で類似商品を検索
         elif mode == 3:
-            a
-        return a
+            target_price = target_price * (1 - 0.1) # システムが提案する価格より10%低い価格で類似商品を検索
 
     def brand_policy(self, mode, sys_thinking_price):
         """
@@ -157,13 +161,15 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格と同じぐらいの価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より少し低い価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         """
+        brand_add_info = read_json("")
+        target_price = sys_thinking_price
+
         if mode == 1:
-            return ""
+            return "" # 追加する情報は無し
         elif mode == 2:
-            a
+            target_price = target_price * (1 - 0.05) # システムが提案する価格より5%低い価格で類似商品を検索
         elif mode == 3:
-            a
-        return a
+            target_price = target_price * (1 - 0.1) # システムが提案する価格より10%低い価格で類似商品を検索
 
     def template_message(self, intent, price=None):
         print 'template:', intent, price
@@ -173,9 +179,6 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         ### changed part: テンプレートに追加情報を付与
         if intent == 'counter-price':
-
-            # en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
-
             # シナリオのタイトルから、交渉中の商品の大雑把な商品名を取得
             scenario_title = self.kb.title.lower() # シナリオのタイトルを小文字化
             estimated_product_name = "" 
