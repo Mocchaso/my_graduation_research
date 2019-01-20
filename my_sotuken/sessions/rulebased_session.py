@@ -20,11 +20,6 @@ from model.dialogue_state import DialogueState
 ### changed part
 from cocoa.core.util import read_json # 類似商品の情報を読み込むために追加
 from user_attributes_manager import UserAttributesManager as uam # ユーザの買い物属性を考慮して発話文生成を行うために追加
-from cocoa.analysis.utils import get_total_turns # 対話の経過ターン数によってポリシーの挙動を変えるのに用いる
-from web.main.backend import Backend # my_sotukenのbackend ... get_total_turnsで引数をとる準備に用いる
-from cocoa.web.views.utils import userid # ユーザIDの取得に用いる
-from web.main.db_reader import DatabaseReader # my_sotukenのdb_reader
-import sqlite3 # chat_state.dbへのアクセスに使用
 ###
 
 class RulebasedSession(object):
@@ -231,25 +226,6 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         ### changed part: テンプレートに追加情報を付与
         if intent == 'counter-price':
-            # get_total_turns()の引数にとるデータの準備
-            controller = self.backend.controller_map[userid()]
-            conn = sqlite3.connect(self.backend.config["db"]["location"])
-            cursor = conn.cursor()
-            chat_id = controller.get_chat_id()
-            scenario_db = self.backend.scenario_db
-            print("controller: {}".format(controller))
-            print("conn: {}".format(conn))
-            print("cursor: {}".format(cursor))
-            print("chat_id: {}".format(chat_id))
-            print("scenario_db: {}".format(scenario_db))
-            ex = DatabaseReader.get_chat_example(cursor, chat_id, scenario_db).to_dict()
-            conn.close()
-
-            total_turns = get_total_turns(ex)
-            self.prev_total_turns = total_turns # システム側が価格を提案し終わったら、その時点でのターン数を記録(前回の価格の提案から何ターン経過したかを計算するのに用いる)
-            print("counter-price...")
-            print("total_turns: {}".format(total_turns))
-            print("self.prev_total_turns: {}".format(self.prev_total_turns))
 
             # en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
 
@@ -268,11 +244,10 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
                 estimated_product_name = "millberget"
             
             # ポリシーを動かすモードを変更する
-            if total_turns - self.prev_total_turns == 2: # 前回の価格の提案から2ターン経過したら
-                if self.policy_mode == 1:
-                    self.policy_mode = 2
-                elif self.policy_mode == 2:
-                    self.policy_mode = 3
+            if self.policy_mode == 1:
+                self.policy_mode = 2
+            elif self.policy_mode == 2:
+                self.policy_mode = 3
 
             # ユーザの買い物属性ごとに、追加する情報を変化させる
             if uam.answer == 1: # 品質重視
