@@ -120,7 +120,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
     def fill_template(self, template, price=None):
         return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
     
-    def quality_policy(self, mode):
+    def quality_policy(self, mode, sys_thinking_price):
         """
         品質重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
@@ -128,14 +128,14 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         3: 売り手が出そうとした価格と同じぐらいの価格の提案＋その価格に近い類似商品の、商品名と品質に関してポジティブなレビュー
         """
         if mode == 1:
-            return u"あ"
+            return ""
         elif mode == 2:
             a
         elif mode == 3:
             a
         return a
 
-    def price_policy(self, mode):
+    def price_policy(self, mode, sys_thinking_price):
         """
         価格重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
@@ -150,7 +150,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
             a
         return a
 
-    def brand_policy(self, mode):
+    def brand_policy(self, mode, sys_thinking_price):
         """
         銘柄重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
@@ -165,57 +165,6 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
             a
         return a
 
-    '''
-    def add_quality_info(self, product_name, similar_product_info):
-        """
-        品質重視のユーザに対して新たな発話文生成を行う
-        """
-        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
-        key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"]
-        if product_name in ["kullen", "millberget"]: # 交渉中の商品がKULLENかMILLBERGETの場合、類似商品の数が少し合わないためリストの内容を変更
-             key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2"]
-        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
-        selected_product_of_random_review = random.choice(similar_product_info[key]["reviews"]) # レビュー文をランダムで取得
-        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
-        if selected_product_of_random_review == []: # ポジティブなレビューが無い場合
-            add_info = " / Not found appropriate review of similar product, URL: {}".format(selected_product_url)
-            return add_info
-        else:
-            add_info = " / Review of similar product: {} URL: {}".format(selected_product_of_random_review, selected_product_url) # 英文間の半角スペース付き
-            return add_info
-    
-    def add_price_info(self, product_name, similar_product_info):
-        """
-        価格重視のユーザに対して新たな発話文生成を行う
-        """
-        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
-        key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"]
-        if product_name in ["kullen", "millberget"]: # 交渉中の商品がKULLENかMILLBERGETの場合、類似商品の数が少し合わないためリストの内容を変更
-             key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2"]
-        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
-        selected_product_price_dollar = similar_product_info[key]["price_dollar"] # 選ばれた商品のドル価格（オンラインストア表示価格）
-        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
-
-        add_info = " / Price of similar product: {} dollars(from online store). URL: {}".format(selected_product_price_dollar, selected_product_url) # 英文間の半角スペース付き
-        return add_info
-    
-    def add_brand_info(self, product_name, similar_product_info):
-        """
-        銘柄重視のユーザに対して新たな発話文生成を行う
-        """
-        # 追加する類似商品の情報をどの銘柄から選ぶかランダムで決める
-        key_candidates = ["_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2", "_muji3"] # 実験で使う商品はIKEAの商品のみなので、IKEA以外の類似商品を候補とする
-        if product_name in ["kullen", "millberget"]: # 交渉中の商品がKULLENかMILLBERGETの場合、類似商品の数が少し合わないためリストの内容を変更
-             key_candidates = ["_ikea1", "_ikea2", "_ikea3", "_nitori1", "_nitori2", "_nitori3", "_muji1", "_muji2"]
-        key = product_name + random.choice(key_candidates) # どの類似商品の情報を持ってくるかをランダムで決定
-        selected_product_price_dollar = similar_product_info[key]["price_dollar"] # 選ばれた商品のドル価格（オンラインストア表示価格）
-        selected_product_brand = similar_product_info[key]["brand"] # 選ばれた商品の銘柄
-        selected_product_url = similar_product_info[key]["url"] # 選ばれた商品のページのURL
-
-        add_info = " / Price of similar product, brand {}: {} dollars(from online store). URL: {}".format(selected_product_brand, selected_product_price_dollar, selected_product_url) # 英文間の半角スペース付き
-        return add_info
-    '''
-
     def template_message(self, intent, price=None):
         print 'template:', intent, price
         template = self.retrieve_response_template(intent, category=self.kb.category, role=self.kb.role)
@@ -227,7 +176,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
             # en_positive_reviews_info = read_json("./data/my_additional_info/en_positive_reviews_info.json") # ポジティブなレビューのみを抽出した類似商品の情報
 
-            # シナリオのタイトルから大雑把な商品名を記録
+            # シナリオのタイトルから、交渉中の商品の大雑把な商品名を取得
             scenario_title = self.kb.title.lower() # シナリオのタイトルを小文字化
             estimated_product_name = "" 
             if "billy" in scenario_title:
@@ -240,23 +189,21 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
                 estimated_product_name = "kullen"
             elif "millberget" in scenario_title:
                 estimated_product_name = "millberget"
+
+            # ユーザの買い物属性ごとに、追加する情報を変化させる
+            sys_thinking_price = price
+            if uam.answer == 1: # 品質重視のpolicy
+                template["template"] += self.quality_policy(self.policy_mode, sys_thinking_price)
+            elif uam.answer == 2: # 価格重視のpolicy
+                template["template"] += self.price_policy(self.policy_mode, sys_thinking_price)
+            elif uam.answer == 3: # 銘柄重視のpolicy
+                template["template"] += self.brand_policy(self.policy_mode, sys_thinking_price)
             
-            # ポリシーを動かすモードを変更する
+            # 提案を終えたら、ポリシーを動かすモードを変更する
             if self.policy_mode == 1:
                 self.policy_mode = 2
             elif self.policy_mode == 2:
                 self.policy_mode = 3
-
-            # ユーザの買い物属性ごとに、追加する情報を変化させる
-            if uam.answer == 1: # 品質重視
-                # template["template"] += self.add_quality_info(estimated_product_name, en_positive_reviews_info)
-                template["template"] += self.quality_policy(self.policy_mode)
-            elif uam.answer == 2: # 価格重視
-                # template["template"] += self.add_price_info(estimated_product_name, en_positive_reviews_info)
-                template["template"] += self.price_policy(self.policy_mode)
-            elif uam.answer == 3: # 銘柄重視
-                # template["template"] += self.add_brand_info(estimated_product_name, en_positive_reviews_info)
-                template["template"] += self.brand_policy(self.policy_mode)
             
             print "templates(added more info):"
             print template
