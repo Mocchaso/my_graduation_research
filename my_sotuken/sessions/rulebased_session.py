@@ -20,6 +20,7 @@ from model.dialogue_state import DialogueState
 ### changed part
 from cocoa.core.util import read_json # 類似商品の情報を読み込むために追加
 from user_attributes_manager import UserAttributesManager as uam # ユーザの買い物属性を考慮して発話文生成を行うために追加
+from decimal import Decimal, ROUND_HALF_UP # 円ドル変換後の四捨五入に使用
 ###
 
 class RulebasedSession(object):
@@ -116,6 +117,30 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         super(CraigslistRulebasedSession, self).receive(event)
         if self.bottomline is None:
             self.bottomline = self.estimate_bottomline()
+    
+    def yen_to_dollar(yen):
+        """
+        円をドルに変換する
+        """
+        rate = 109.64
+        converted = Decimal(yen / rate)
+        result = converted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return float(result)
+
+    def dollar_to_yen(dollar):
+        """
+        ドルを円に変換する
+        """
+        rate = 109.64
+        converted = Decimal(dollar * rate)
+        result = converted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return float(result)
+
+    def adjust_ratio_sys_price():
+        """
+        比率を合わせる
+        """
+        return 
 
     def quality_policy(self, mode, sys_thinking_price):
         """
