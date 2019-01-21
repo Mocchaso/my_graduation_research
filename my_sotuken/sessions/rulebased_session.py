@@ -118,7 +118,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         if self.bottomline is None:
             self.bottomline = self.estimate_bottomline()
     
-    def yen_to_dollar(yen):
+    def yen_to_dollar(self, yen):
         """
         円をドルに変換する
         """
@@ -127,7 +127,7 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         result = converted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return float(result)
 
-    def dollar_to_yen(dollar):
+    def dollar_to_yen(self, dollar):
         """
         ドルを円に変換する
         """
@@ -136,11 +136,14 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         result = converted.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         return float(result)
 
-    def adjust_ratio_sys_price():
+    def adjust_ratio_sys_price(self, price, online_price):
         """
-        比率を合わせる
+        交渉で扱う商品のオンラインストアでの価格から、交渉中に出てくる価格の比率を合わせる
+        price: 比率調整の対象となる価格の数値
         """
-        return 
+        adjusted = Decimal(online_price * (price / self.listing_price))
+        result = adjusted.quantize(Decimal("1.0"), rounding=ROUND_HALF_UP) # 1の位に四捨五入
+        return float(result)
 
     def quality_policy(self, mode, sys_thinking_price):
         """
