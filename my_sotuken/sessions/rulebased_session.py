@@ -117,9 +117,6 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         if self.bottomline is None:
             self.bottomline = self.estimate_bottomline()
 
-    def fill_template(self, template, price=None):
-        return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
-    
     def quality_policy(self, mode, sys_thinking_price):
         """
         品質重視のユーザに対して新たな発話文生成を行う
@@ -127,15 +124,17 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格より少し高い価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         3: 価格の提案＋提案する価格と同じぐらいの価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         """
-        quality_add_info = read_json("")
+        # quality_add_info = read_json("")
         target_price = sys_thinking_price
         
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
             target_price = target_price * (1 + 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%高い価格に設定
+            return ""
         elif mode == 3:
             target_price = sys_thinking_price # 類似商品の検索にかける価格を、システムが提案する価格と同じ価格に設定
+            return ""
 
     def price_policy(self, mode, sys_thinking_price):
         """
@@ -144,15 +143,17 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格より少し低い価格の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より低い価格の類似商品の商品名とその価格（2より低めの価格とする）
         """
-        price_add_info = read_json("")
+        # price_add_info = read_json("")
         target_price = sys_thinking_price
         
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
             target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
+            return ""
         elif mode == 3:
             target_price = target_price * (1 - 0.07) # 類似商品の検索にかける価格を、システムが提案する価格より7%低い価格に設定
+            return ""
 
     def brand_policy(self, mode, sys_thinking_price):
         """
@@ -161,15 +162,20 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         2: 価格の提案＋提案する価格と同じぐらいの価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より少し低い価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         """
-        brand_add_info = read_json("")
+        # brand_add_info = read_json("")
         target_price = sys_thinking_price
 
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
             target_price = sys_thinking_price # 類似商品の検索にかける価格を、システムが提案する価格と同じぐらいの価格に設定
+            return ""
         elif mode == 3:
             target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
+            return ""
+
+    def fill_template(self, template, price=None):
+        return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
 
     def template_message(self, intent, price=None):
         print 'template:', intent, price
@@ -177,8 +183,32 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         print "templates:" # {'category': ..., 'template': ..., 'logp': ..., 'source': 'rule', 'tag': ..., 'role': ..., 'context': ..., 'id': ..., 'context_tag': ...}
         print template
 
+        if '{price}' in template['template']:
+            price = price or self.state.my_price
+        else:
+            price = None
+
+        lf = LF(intent, price=price)
+        text = self.fill_template(template['template'], price=price)
+
         ### changed part: テンプレートに追加情報を付与
+        added_text = text # 類似商品の情報を追加するための変数
         if intent == 'counter-price':
+            price = (price or '')
+            listing_price = self.listing_price
+            partner_price = (self.state.partner_price or '')
+            my_price = (self.state.my_price or '') # template_messageで考慮されている(244行目)みたいだけど、一応my_priceも用意する
+
+            # システムが考えている価格の提案を記録する（partner_priceは恐らく使わないので除外）
+            sys_thinking_price = price
+            if sys_thinking_price == '':
+                if '{listing_price}' in template['template']:
+                    sys_thinking_price = listing_price
+                elif '{my_price}' in template['template']:
+                    sys_thinking_price = my_price
+            print("sys_thinking_price: {}".format(sys_thinking_price))
+            print("type(sys_thinking_price): {}".format(type(sys_thinking_price)))
+
             # シナリオのタイトルから、交渉中の商品の大雑把な商品名を取得
             scenario_title = self.kb.title.lower() # シナリオのタイトルを小文字化
             estimated_product_name = "" 
@@ -194,31 +224,21 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
                 estimated_product_name = "millberget"
 
             # ユーザの買い物属性ごとに、追加する情報を変化させる
-            sys_thinking_price = price
             if uam.answer == 1: # 品質重視のpolicy
-                template["template"] += self.quality_policy(self.policy_mode, sys_thinking_price)
+                added_text += self.quality_policy(self.policy_mode, sys_thinking_price)
             elif uam.answer == 2: # 価格重視のpolicy
-                template["template"] += self.price_policy(self.policy_mode, sys_thinking_price)
+                added_text += self.price_policy(self.policy_mode, sys_thinking_price)
             elif uam.answer == 3: # 銘柄重視のpolicy
-                template["template"] += self.brand_policy(self.policy_mode, sys_thinking_price)
+                added_text += self.brand_policy(self.policy_mode, sys_thinking_price)
             
             # 提案を終えたら、ポリシーを動かすモードを変更する
             if self.policy_mode == 1:
                 self.policy_mode = 2
             elif self.policy_mode == 2:
                 self.policy_mode = 3
-            
-            print "templates(added more info):"
-            print template
         ###
 
-        if '{price}' in template['template']:
-            price = price or self.state.my_price
-        else:
-            price = None
-        lf = LF(intent, price=price)
-        text = self.fill_template(template['template'], price=price)
-        utterance = Utterance(raw_text=text, logical_form=lf, template=template)
+        utterance = Utterance(raw_text=added_text, logical_form=lf, template=template)
         return self.message(utterance)
 
     def _compromise_price(self, price):
