@@ -19,11 +19,11 @@ experiment_target_furnitures = [
 # 買い手側に見える商品データの説明文、日本語版
 # HTML内でsafeフィルターを適用しているので、以下のHTMLタグも反映されるようになっている
 description_buyer_ja = [
-    u"幅：31と1/2 inch（80 cm）、奥行き：11 inch（28 cm）<br><a href='https://www.ikea.com/jp/ja/catalog/products/10404246/#/40351581' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
-    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30176069/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
-    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30354660/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",
-    u"IKEA製のナイトテーブルです。幅：35 cm、奥行き：40 cm、高さ：49 cm<br><a href='https://www.ikea.com/jp/ja/catalog/products/30355706/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては微妙なので少し変更する
-    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a>"
+    u"幅：31と1/2 inch（80 cm）、奥行き：11 inch（28 cm）<br><a href='https://www.ikea.com/jp/ja/catalog/products/10404246/#/40351581' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a><br>オンラインストアでの価格：6,999円 -> 63.79ドル（2019年1月24日時点）",
+    u"ベッドサイドのテーブル、あるいは保管用として最適です。錠と鍵も付属しています。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30176069/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a><br>オンラインストアでの価格：9,990円 -> 91.04ドル（2019年1月24日時点）",
+    u"Ikea Malm ... 3つの引き出し付きのタンスです。<br>色：カンバ材（Birch veneer）<br>状態：非常に良好で引き出しはスムーズに動きます。<br><a href='https://www.ikea.com/jp/ja/catalog/products/30354660/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a><br>オンラインストアでの価格：12,990円 -> 118.38ドル（2019年1月24日時点）",
+    u"IKEA製のナイトテーブルです。幅：35 cm、奥行き：40 cm、高さ：49 cm<br><a href='https://www.ikea.com/jp/ja/catalog/products/30355706/' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a><br>オンラインストアでの価格：3,999円 -> 36.44ドル（2019年1月24日時点）",# u"型番は不明ですが、IKEAで購入しました。" -> 説明文としては微妙なので少し変更する
+    u"6か月間使用されたものですが、新品のように綺麗です。また、セダンの後部座席に置けるほどの大きさです。<br><a href='https://www.ikea.com/jp/ja/catalog/products/50339414/#/00339416' target='_blank'>商品の詳細情報（IKEA公式オンラインストアのページ）</a><br>オンラインストアでの価格：9,990円 -> 91.04ドル（2019年1月24日時点）"
 ]
 
 """

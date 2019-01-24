@@ -21,6 +21,9 @@ from model.dialogue_state import DialogueState
 from cocoa.core.util import read_json # 類似商品の情報を読み込むために追加
 from user_attributes_manager import UserAttributesManager as uam # ユーザの買い物属性を考慮して発話文生成を行うために追加
 from decimal import Decimal, ROUND_HALF_UP # 円ドル変換後の四捨五入に使用
+# ネガポジ判定に使用
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 ###
 
 class RulebasedSession(object):
@@ -57,6 +60,8 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
         ### changed part:
         self.policy_mode = 1 # 各ポリシーの対話モード(1: 通常の価格の提案, 2, 3は各ポリシーに後述)
+        self.similar_products_json = read_json("./data/my_additional_info/similar_products_info.json")
+        nltk.download("vader_lexicon") # ネガポジ判定に必要なモデルをダウンロード
         ###
 
     def shorten_title(self, title):
@@ -145,62 +150,168 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         result = adjusted.quantize(Decimal("1.0"), rounding=ROUND_HALF_UP) # 1の位に四捨五入
         return float(result)
 
-    def quality_policy(self, mode, sys_thinking_price):
+    def is_positive(self, text):
+        """
+        ネガポジ判定でcompoundが0.5以上ならポジティブとする
+        return: True or False
+        """
+        print("analyzed text: {}".format(text))
+
+        positive_threshold = 0.5 # ポジティブであると見なす閾値
+        analyzer = SentimentIntensityAnalyzer()
+        all_score = analyzer.polarity_scores(text)
+        print("all_score '{}': {}".format(text, all_score))
+        compound_score = all_score["compound"]
+        return compound_score >= positive_threshold
+
+    def quality_policy(self, mode, sys_thinking_price, estimated_product_name):
         """
         品質重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
         2: 価格の提案＋提案する価格より少し高い価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         3: 価格の提案＋提案する価格と同じぐらいの価格の類似商品の商品名と、その品質に関してポジティブなレビュー
         """
-        # quality_add_info = read_json("")
-        target_price = sys_thinking_price
+        # 交渉で扱う商品のオンライン価格を保存
+        online_price_yen = 0
+        if estimated_product_name == "billy":
+            online_price_yen = 6999
+        elif estimated_product_name == "erik":
+            online_price_yen = 9990
+        elif estimated_product_name == "malm":
+            online_price_yen = 12990
+        elif estimated_product_name == "kullen":
+            online_price_yen = 3999
+        elif estimated_product_name == "millberget":
+            online_price_yen = 9990
         
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = target_price * (1 + 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%高い価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen) * (1 + 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%高い価格に設定
         elif mode == 3:
-            target_price = sys_thinking_price # 類似商品の検索にかける価格を、システムが提案する価格と同じ価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen) # 類似商品の検索にかける価格を、システムが提案する価格と同じ価格に設定
+        
+        ### なるべくtarget_priceに近い価格の類似商品の情報を取得する
+        price_order = [] # 検索する価格に近い類似商品の価格を、順番を記録する
+        similar_products_info = self.similar_products_json[estimated_product_name]
+        for i, similar_product in enumerate(similar_products_info):
+            # 類似商品の価格と、検索にかけた価格の差を求めて、リストに保存する
+            target_diff = abs(similar_product["price_yen"] - target_price)
+            price_order.append((i, target_diff))
+        price_order.sort(key=lambda x: x[1]) # 検索にかけた価格に近い順に、類似商品の価格情報をソートする
 
-    def price_policy(self, mode, sys_thinking_price):
+        # 検索にかけた価格に最も近い類似商品を選択する＆一度選ばれた類似商品をデータから削除する
+        selected_similar_product = self.similar_products_json[estimated_product_name][price_order[0][0]]
+        self.similar_products_json[estimated_product_name].pop(price_order[0][0])
+
+        # quality policyで必要な情報を取得する
+        selected_product_name = selected_similar_product["product_name"]
+        positive_reviews = [review["en"] for review in selected_similar_product["reviews"] if self.is_positive(review["en"])] # 選ばれた類似商品のレビューのうち、ポジティブなもののみを抽出
+        selected_positive_review_en = random.choice(positive_reviews) # ポジティブなレビューをランダムで選択する
+        selected_shorten_url = selected_similar_product["shorten_url"]
+
+        # 追加する文章をreturn
+        print("quailty end")
+        return " / A similar product: '{}', A positive review: '{}', URL: {}".format(selected_product_name, selected_positive_review_en, selected_shorten_url)
+
+    def price_policy(self, mode, sys_thinking_price, estimated_product_name):
         """
         価格重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
         2: 価格の提案＋提案する価格より少し低い価格の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より低い価格の類似商品の商品名とその価格（2より低めの価格とする）
         """
-        # price_add_info = read_json("")
-        target_price = sys_thinking_price
+        # 交渉で扱う商品のオンライン価格を保存
+        online_price_yen = 0
+        if estimated_product_name == "billy":
+            online_price_yen = 6999
+        elif estimated_product_name == "erik":
+            online_price_yen = 9990
+        elif estimated_product_name == "malm":
+            online_price_yen = 12990
+        elif estimated_product_name == "kullen":
+            online_price_yen = 3999
+        elif estimated_product_name == "millberget":
+            online_price_yen = 9990
         
+        # 提案する価格に、ポリシー内のモードごとの補正＋オンライン価格の補正をかける
+        target_price = 0
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen * (1 - 0.05)) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
         elif mode == 3:
-            target_price = target_price * (1 - 0.07) # 類似商品の検索にかける価格を、システムが提案する価格より7%低い価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen * (1 - 0.07)) # 類似商品の検索にかける価格を、システムが提案する価格より7%低い価格に設定
+        
+        ### なるべくtarget_priceに近い価格の類似商品の情報を取得する
+        price_order = [] # 検索する価格に近い類似商品の価格を、順番を記録する
+        similar_products_info = self.similar_products_json[estimated_product_name]
+        for i, similar_product in enumerate(similar_products_info):
+            # 類似商品の価格と、検索にかけた価格の差を求めて、リストに保存する
+            target_diff = abs(similar_product["price_yen"] - target_price)
+            price_order.append((i, target_diff))
+        price_order.sort(key=lambda x: x[1]) # 検索にかけた価格に近い順に、類似商品の価格情報をソートする
 
-    def brand_policy(self, mode, sys_thinking_price):
+        # 検索にかけた価格に最も近い類似商品を選択する＆一度選ばれた類似商品をデータから削除する
+        selected_similar_product = self.similar_products_json[estimated_product_name][price_order[0][0]]
+        self.similar_products_json[estimated_product_name].pop(price_order[0][0])
+
+        # price policyで必要な情報を取得する
+        selected_product_name = selected_similar_product["product_name"]
+        selected_product_price = self.yen_to_dollar(selected_similar_product["price_yen"]) # 取得した類似商品の価格をドルに変換しておく
+        selected_shorten_url = selected_similar_product["shorten_url"]
+
+        # 追加する文章をreturn
+        return " / A similar product: '{}', the price(dollar): '{}', URL: {}".format(selected_product_name, selected_product_price, selected_shorten_url)
+
+    def brand_policy(self, mode, sys_thinking_price, estimated_product_name):
         """
         銘柄重視のユーザに対して新たな発話文生成を行う
         1: 価格の提案（通常モード。追加する情報は無し）
         2: 価格の提案＋提案する価格と同じぐらいの価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         3: 価格の提案＋提案する価格より少し低い価格で、交渉中の商品より良い銘柄の類似商品の商品名とその価格
         """
-        # brand_add_info = read_json("")
-        target_price = sys_thinking_price
+        # 交渉で扱う商品のオンライン価格を保存
+        online_price_yen = 0
+        if estimated_product_name == "billy":
+            online_price_yen = 6999
+        elif estimated_product_name == "erik":
+            online_price_yen = 9990
+        elif estimated_product_name == "malm":
+            online_price_yen = 12990
+        elif estimated_product_name == "kullen":
+            online_price_yen = 3999
+        elif estimated_product_name == "millberget":
+            online_price_yen = 9990
 
         if mode == 1:
             return "" # 追加する情報は無し
         elif mode == 2:
-            target_price = sys_thinking_price # 類似商品の検索にかける価格を、システムが提案する価格と同じぐらいの価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen) # 類似商品の検索にかける価格を、システムが提案する価格と同じぐらいの価格に設定
         elif mode == 3:
-            target_price = target_price * (1 - 0.05) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
-            return ""
+            target_price = self.adjust_ratio_sys_price(sys_thinking_price, online_price_yen * (1 - 0.05)) # 類似商品の検索にかける価格を、システムが提案する価格より5%低い価格に設定
+        
+        ### なるべくtarget_priceに近い価格の類似商品の情報を取得する
+        price_order = [] # 検索する価格に近い類似商品の価格を、順番を記録する
+        similar_products_info = self.similar_products_json[estimated_product_name]
+        for i, similar_product in enumerate(similar_products_info):
+            # 類似商品の価格と、検索にかけた価格の差を求めて、リストに保存する
+            target_diff = abs(similar_product["price_yen"] - target_price)
+            price_order.append((i, target_diff))
+        price_order.sort(key=lambda x: x[1]) # 検索にかけた価格に近い順に、類似商品の価格情報をソートする
+
+        # 検索にかけた価格に最も近い類似商品を選択する＆一度選ばれた類似商品をデータから削除する
+        selected_similar_product = self.similar_products_json[estimated_product_name][price_order[0][0]]
+        self.similar_products_json[estimated_product_name].pop(price_order[0][0])
+
+        # brand policyで必要な情報を取得する
+        selected_product_name = selected_similar_product["product_name"]
+        selected_product_price = self.yen_to_dollar(selected_similar_product["price_yen"]) # 取得した類似商品の価格をドルに変換しておく
+        selected_product_brand = selected_similar_product["brand"]
+        selected_shorten_url = selected_similar_product["shorten_url"]
+
+        # 追加する文章をreturn
+        return " / A similar product: '{}', the price(dollar): '{}', the brand: '{}', URL: {}".format(selected_product_name, selected_product_price, selected_product_brand, selected_shorten_url)
 
     def fill_template(self, template, price=None):
         return template.format(title=self.title, price=(price or ''), listing_price=self.listing_price, partner_price=(self.state.partner_price or ''), my_price=(self.state.my_price or ''))
@@ -253,12 +364,13 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
 
             # ユーザの買い物属性ごとに、追加する情報を変化させる
             if uam.answer == 1: # 品質重視のpolicy
-                added_text += self.quality_policy(self.policy_mode, sys_thinking_price)
+                added_text += self.quality_policy(self.policy_mode, sys_thinking_price, estimated_product_name)
             elif uam.answer == 2: # 価格重視のpolicy
-                added_text += self.price_policy(self.policy_mode, sys_thinking_price)
+                added_text += self.price_policy(self.policy_mode, sys_thinking_price, estimated_product_name)
             elif uam.answer == 3: # 銘柄重視のpolicy
-                added_text += self.brand_policy(self.policy_mode, sys_thinking_price)
-            
+                added_text += self.brand_policy(self.policy_mode, sys_thinking_price, estimated_product_name)
+            print("added_text: {}".format(added_text))
+
             # 提案を終えたら、ポリシーを動かすモードを変更する
             if self.policy_mode == 1:
                 self.policy_mode = 2
