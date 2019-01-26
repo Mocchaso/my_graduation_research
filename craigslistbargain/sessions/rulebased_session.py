@@ -111,6 +111,10 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
     def template_message(self, intent, price=None):
         print 'template:', intent, price
         template = self.retrieve_response_template(intent, category=self.kb.category, role=self.kb.role)
+        # changed part: add print for test
+        print "template:" # {'category': ..., 'template': ..., 'logp': ..., 'source': 'rule', 'tag': ..., 'role': ..., 'context': ..., 'id': ..., 'context_tag': ...}
+        print template
+
         if '{price}' in template['template']:
             price = price or self.state.my_price
         else:
