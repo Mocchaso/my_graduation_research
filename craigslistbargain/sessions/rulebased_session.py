@@ -114,13 +114,24 @@ class CraigslistRulebasedSession(BaseRulebasedSession):
         # changed part: add print for test
         print "template:" # {'category': ..., 'template': ..., 'logp': ..., 'source': 'rule', 'tag': ..., 'role': ..., 'context': ..., 'id': ..., 'context_tag': ...}
         print template
+        #
 
         if '{price}' in template['template']:
             price = price or self.state.my_price
         else:
             price = None
+        
+        # changed part: add print for test
+        print("price of system: {}".format(price))
+        #
+
         lf = LF(intent, price=price)
+
         text = self.fill_template(template['template'], price=price)
+        # changed part: add print for test
+        print("text: {}".format(text))
+        #
+
         utterance = Utterance(raw_text=text, logical_form=lf, template=template)
         return self.message(utterance)
 
